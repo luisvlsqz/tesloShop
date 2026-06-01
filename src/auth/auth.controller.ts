@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, UseGuards, Req, SetMetadata } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from './dto';
 import { User } from './entities/user.entity';
@@ -10,6 +11,7 @@ import { RoleProtected } from './decorators/role-protected.decorator';
 import { GetUser } from './decorators/get-user.decorator';
 import { ValidRoles } from './interfaces/valid-roles';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -24,6 +26,15 @@ export class AuthController {
     return this.authService.login(loginUserDto);
   }
 
+  @Get('check-status')
+  @Auth()
+  checkAuthStatus(
+    @GetUser() user: User
+    //todo
+  ){
+      return this.authService.checkAuthStatus(user);
+  }
+
   @Get('private')
   @UseGuards( AuthGuard() )
   testingPrivateRoute(
@@ -32,8 +43,6 @@ export class AuthController {
     @GetUser('email') userEmail: string,
     @RawHeaders() rawHeaders: string[]
   ) {
-
-    console.log({request });
 
     return {
       ok: true,
